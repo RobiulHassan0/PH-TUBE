@@ -1,6 +1,31 @@
-import { loadCategories, loadVideos } from "./api.js";
+function loadCategories() {
+    fetch('https://openapi.programming-hero.com/api/phero-tube/categories')
+        .then(
+            (response) => response.json()
+        )
+    .then(
+        (data) => displayCategories(data.categories)
+    );
+}
 
-export function displayCategories(categories){
+function loadVideos(){
+    fetch("https://openapi.programming-hero.com/api/phero-tube/videos")
+    .then((response) => response.json())
+    .then(data => displayVideos(data.videos));
+}
+
+const loadCategoryVideos = (id) =>{
+    const url = `
+        https://openapi.programming-hero.com/api/phero-tube/category/${id}
+    `;
+    fetch(url)
+    .then(res => res.json())
+    .then((data) => displayVideos(data.category));
+}
+
+// =======================
+
+function displayCategories(categories){
     // get the container
     const categoryContainer = document.getElementById('category-container');
     // loop on array of object
@@ -9,27 +34,48 @@ export function displayCategories(categories){
         // create Element 
         const categoryDiv = document.createElement("div");
         categoryDiv.innerHTML = `
-            <button class="btn btn-sm hover:bg-[#ff1f3d] hover:text-white">${category.category}</button>
+            <button onclick="loadCategoryVideos(${category.category_id})" class="btn btn-sm hover:bg-[#ff1f3d] hover:text-white">${category.category}</button>
         `;
         // Append the Element
         categoryContainer.append(categoryDiv)
+
+        // const allButtons = categoryContainer.querySelectorAll('button');
+        // allButtons.forEach(btn => {
+        //     btn.addEventListener('click', () => {
+        //         const categoryId = btn.getAttribute('data-id');
+        //         loadCategoryVideos(categoryId);
+        //     })
+        // })
     }
 }
 
-export function displayVideos(videos){
+function displayVideos(videos){
     const videoContainer = document.getElementById("videoContainer");
-
+    videoContainer.innerHTML = "";
     videos.forEach(video => {
         // create Element
         const videoCard = document.createElement('div');
+        // ${video.others.posted_date}
         videoCard.innerHTML = `
-            <div class="card bg-base-100 w-96 shadow-sm">
-                <figure> <img src="${video.thumbnail}"/></figure>   
-                <div class="card-body">
-                    <h2 class="card-title">${video.title}</h2>
-                    <p>A card component has a figure, a body part, and inside body there are title and actions parts</p>
-                    <div class="card-actions justify-end">
-                    <button class="btn btn-primary">Buy Now</button>
+            <div class="card bg-base-100">
+                <figure class="relative">
+                    <img class="w-full h-[200px] object-cover" src="${video.thumbnail}"/>
+                    <span class="absolute bottom-2 right-2 text-sm rounded bg-black text-white px-2">
+                        3hrs 56 min ago 
+                    </span>
+                </figure>   
+                <div class="flex gap-3 px-0 py-5">
+                    <div class="profile">
+                        <div class="avatar">
+                            <div class="w-10 rounded-full">
+                                <img src="${video.authors[0].profile_picture}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="intro space-y-1">
+                        <h2 class="text-sm font-semibold">${video.title}</h2>
+                        <p class="text-sm text-gray-400 flex gap-1">${video.authors[0].profile_name}<img class="w-5 h-5" src="https://img.icons8.com/?size=48&id=QMxOVe0B9VzG&format=png" alt=""></p>
+                        <p class="text-sm text-gray-400">${video.others.views} views</p>
                     </div>
                 </div>
             </div>
@@ -41,4 +87,3 @@ export function displayVideos(videos){
 
 
 loadCategories();
-loadVideos();
